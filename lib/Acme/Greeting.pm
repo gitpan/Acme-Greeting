@@ -1,11 +1,11 @@
 package Acme::Greeting;
-use warnings;
 use strict;
-use 5.006;
+use warnings;
+use v5.12.3;
 use utf8;
 use self;
 
-our $VERSION = '0.0.2';
+our $VERSION = '0.0.3';
 
 my $last = "";
 
@@ -22,14 +22,21 @@ sub new {
     }
 
     my @greeting = ();
-    open(my $DB, "<:utf8", $realfile);
-    while (<$DB>) {
-        chomp;
-        if ( m/^=item\ (.+)$ /x ) {
-            push @greeting, $1;
+
+    my $DB;
+    open($DB, "<:utf8", $realfile) and do {
+        while (<$DB>) {
+            chomp;
+            if ( m/^=item\ (.+)$ /x ) {
+                push @greeting, $1;
+            }
         }
+        close $DB;
+    };
+
+    if (@greeting == 0) {
+        push @greeting, __PACKAGE__ . ' says hi, $u';
     }
-    close $DB;
 
     my $greeting = $last;
     while ($greeting eq $last) {
